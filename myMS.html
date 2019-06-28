@@ -28,6 +28,8 @@
 
         class Board {
             constructor(width, height, mine_count) {
+                this.in_game = false;
+                this.end_game = false;
                 this.board = [];
                 this.width = width;
                 this.height = height;
@@ -177,17 +179,23 @@
             }
 
             click(x, y) {
-                if (x <= 0 || x >= this.x_max || y <= 0 || y >= this.y_max) {
+                if (x <= 0 || x >= this.x_max || y <= 0 || y >= this.y_max || this.end_game) {
                     return null;
                 }
                 var cur_cell = this.board[y][x];
                 if (cur_cell.display != '.') {
-                    return null;
+                    return this.probe(x, y);
+                }
+                if (!this.in_game) {
+                    this.place_mine(x, y);
+                    board.update_real();
+                    this.in_game = true;
                 }
                 var index = String(this.compute_index(x, y));
                 if (cur_cell.is_mine) {
                     cur_cell.display = '@';
                     document.getElementById(index).innerHTML = '@';
+                    this.end_game = true;
                     this.print_final_board();
                 } else {
                     cur_cell.display = cur_cell.real;
@@ -213,7 +221,7 @@
             }
 
             flag(x, y) {
-                if (x <= 0 || x >= this.x_max || y <= 0 || y >= this.y_max) {
+                if (x <= 0 || x >= this.x_max || y <= 0 || y >= this.y_max || !this.in_game) {
                     return null;
                 }
                 var cur_cell = this.board[y][x];
@@ -225,7 +233,7 @@
             }
 
             probe(x, y) {
-                if (x <= 0 || x >= this.x_max || y <= 0 || y >= this.y_max) {
+                if (x <= 0 || x >= this.x_max || y <= 0 || y >= this.y_max || !this.in_game) {
                     return null;
                 }
                 if (this.board[y][x].display == this.board[y][x].real) {
@@ -249,11 +257,10 @@
                 }
             }
         }
+
         board = new Board(8, 6, 10);
         window.onload = function() {
             board.init_board();
-            board.place_mine(1, 1);
-            board.update_real();
             var table = document.createElement("table");
             table.id = "board";
             document.getElementById("display").appendChild(table);
@@ -268,13 +275,7 @@
                     new_button.id = String(index);
                     new_button.innerHTML = board.board[row+1][col+1].display;
                     var y_x = board.compute_y_x(index);
-                    function click_cell() {
-                        return board.click(y_x[1], y_x[0]);
-                    }
-                    // new_button.onclick = function () {
-                    //     board.click(y_x[1], y_x[0]);
-                    // }
-                    new_button.onclick = click_cell
+                    new_button.onclick = Function("board.click(" + y_x[1] + "," + y_x[0] + ")");
                     new_cell.appendChild(new_button);
                     index++;
                 }
