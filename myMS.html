@@ -184,7 +184,11 @@
                 }
                 var cur_cell = this.board[y][x];
                 if (cur_cell.display != '.') {
-                    return this.probe(x, y);
+                    if (cur_cell.display != 0) {
+                        return this.probe(x, y);
+                    } else {
+                        return null;
+                    }
                 }
                 if (!this.in_game) {
                     this.place_mine(x, y);
@@ -195,6 +199,7 @@
                 if (cur_cell.is_mine) {
                     cur_cell.display = '@';
                     document.getElementById(index).innerHTML = '@';
+                    this.in_game = false;
                     this.end_game = true;
                     this.print_final_board();
                 } else {
@@ -215,6 +220,8 @@
                     }
                 }
                 if (this.safe_cnt == 0) {
+                    this.in_game = false;
+                    this.end_game = true;
                     console.log('Congrats!')
                 }
                 this.print_display_board();
@@ -230,6 +237,8 @@
                 } else if (cur_cell.display == 'F') {
                     cur_cell.display = '.';
                 }
+                var index = String(this.compute_index(x, y));
+                document.getElementById(index).innerHTML = cur_cell.display;
             }
 
             probe(x, y) {
@@ -251,14 +260,38 @@
                         for (i = 0; i < 8; i++) {
                             x_new = neighbors[i][0];
                             y_new = neighbors[i][1];
-                            this.click(x_new, y_new);
+                            if (this.board[y_new][x_new].display == '.') {
+                                this.click(x_new, y_new);
+                            }
                         }
                     }
                 }
             }
         }
 
-        board = new Board(8, 6, 10);
+        function addLongDown(ele , fn){
+            var time = 0;
+            var flag = false;
+
+            ele.addEventListener('mousedown', function(e){
+                time = new Date().getTime();
+            });
+
+            ele.addEventListener('mouseup', function(e){
+                flag = (new Date().getTime() - time) > 500;
+                if(flag){
+                    fn.call(this , e);
+                }
+            });
+
+            ele.addEventListener('click', function(e){
+                if(flag){
+                    flag = false;
+                    e.stopImmediatePropagation();
+                }
+            });
+        }
+        board = new Board(8, 6, 5);
         window.onload = function() {
             board.init_board();
             var table = document.createElement("table");
@@ -269,13 +302,16 @@
                 var new_row = document.createElement("tr");
                 table.appendChild(new_row);
                 for (var col = 0; col < board.width; col++) {
+                    var y_x = board.compute_y_x(index);
                     var new_cell = document.createElement("td");
                     new_row.appendChild(new_cell);
                     var new_button = document.createElement("button");
+                    // Bind with events
+                    addLongDown(new_button, Function("board.flag(" + y_x[1] + "," + y_x[0] + ")"));
+                    new_button.addEventListener('click' , Function("board.click(" + y_x[1] + "," + y_x[0] + ")"))
                     new_button.id = String(index);
                     new_button.innerHTML = board.board[row+1][col+1].display;
-                    var y_x = board.compute_y_x(index);
-                    new_button.onclick = Function("board.click(" + y_x[1] + "," + y_x[0] + ")");
+                    // new_button.onclick = Function("board.click(" + y_x[1] + "," + y_x[0] + ")");
                     new_cell.appendChild(new_button);
                     index++;
                 }
@@ -284,6 +320,6 @@
     </script>
 </head>
 <body>
-    <div id="display" style="border:1px solid #155fc0; width:1000px;height:1200px;">
+    <div id="display" style="border:1px solid #226ed1; width:1000px; height:1200px;">
     </div>
 </body>
