@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>myMS</title>
@@ -7,8 +8,68 @@
         table {
             margin-left: auto;
             margin-right: auto;
-            margin-top: auto;
-            margin-bottom: auto;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .number {
+            text-align: center;
+            line-height: 30px;
+            height: 30px;
+            width: 10%;
+            font-size: 20px;
+            font-weight: bold;
+            background-color: gainsboro;
+            color: red;
+        }
+
+        .status {
+            padding: 15px 15px 15px 15px;
+            font-size: 20px;
+            font-weight: bold;
+            width: 10%;
+            display: inline-flex;
+            justify-content: center;
+            -webkit-touch-callout: none;
+            /* iOS Safari */
+
+            -webkit-user-select: none;
+            /* Chrome/Safari/Opera */
+
+            -khtml-user-select: none;
+            /* Konqueror */
+
+            -moz-user-select: none;
+            /* Firefox */
+
+            -ms-user-select: none;
+            /* Internet Explorer/Edge */
+        }
+
+        .cell {
+            background-color: gainsboro;
+            border: none;
+            color: gainsboro;
+            padding: 15px 15px 15px 15px;
+            font-size: 20px;
+            font-weight: bold;
+            width: 20px;
+            display: inline-flex;
+            justify-content: center;
+            -webkit-touch-callout: none;
+            /* iOS Safari */
+
+            -webkit-user-select: none;
+            /* Chrome/Safari/Opera */
+
+            -khtml-user-select: none;
+            /* Konqueror */
+
+            -moz-user-select: none;
+            /* Firefox */
+
+            -ms-user-select: none;
+            /* Internet Explorer/Edge */
         }
     </style>
     <script>
@@ -16,9 +77,9 @@
             constructor(is_mine, index) {
                 this.is_mine = is_mine;
                 this.index = index;
-                this.display = '.';
+                this.display = ".";
                 if (is_mine) {
-                    this.real = '#';
+                    this.real = "#";
                 }
                 else {
                     this.real = 0;
@@ -28,6 +89,7 @@
 
         class Board {
             constructor(width, height, mine_count) {
+                this.sec = 0;
                 this.in_game = false;
                 this.end_game = false;
                 this.board = [];
@@ -37,9 +99,11 @@
                 this.y_max = height + 1;
                 this.mine_cnt = mine_count;
                 this.safe_cnt = this.width * this.height - mine_count;
+                this.mine_left = mine_count;
             }
 
             init_board() {
+                this.sec = 0;
                 var index = 1;
                 for (var i = 0; i <= this.y_max; i++) {
                     this.board.push([]);
@@ -49,52 +113,53 @@
                         index++;
                     }
                 }
+                document.getElementById("mine_left").value = this.mine_left;
             };
 
             print_real_board() {
                 for (var i = 1; i < this.y_max; i++) {
-                    var row = '';
+                    var row = "";
                     for (var j = 1; j < this.x_max; j++) {
-                        row += this.board[i][j].real + ' ';
+                        row += this.board[i][j].real + " ";
                     }
-                    console.log(row + '\n');
+                    console.log(row + "\n");
                 }
             };
 
             print_display_board() {
                 for (var i = 1; i < this.y_max; i++) {
-                    var row = '';
+                    var row = "";
                     for (var j = 1; j < this.x_max; j++) {
-                        row += this.board[i][j].display + ' ';
+                        row += this.board[i][j].display + " ";
                     }
-                    console.log(row + '\n');
+                    console.log(row + "\n");
                 }
             };
 
             print_final_board() {
                 for (var i = 1; i < this.y_max; i++) {
-                    var row = '';
+                    var row = "";
                     for (var j = 1; j < this.x_max; j++) {
-                        if (this.board[i][j].display == '.') {
-                            row += this.board[i][j].real + ' ';
-                        } else if (this.board[i][j].display == 'F') {
+                        if (this.board[i][j].display == ".") {
+                            row += this.board[i][j].real + " ";
+                        } else if (this.board[i][j].display == "F") {
                             if (this.board[i][j].is_mine) {
-                                row += this.board[i][j].display + ' ';
+                                row += this.board[i][j].display + " ";
                             } else {
-                                row += 'X' + ' ';
+                                row += "X" + " ";
                             }
                         } else {
-                            row += this.board[i][j].display + ' ';
+                            row += this.board[i][j].display + " ";
                         }
                     }
-                    console.log(row + '\n');
+                    console.log(row + "\n");
                 }
             }
 
             place_mine(x_init, y_init) {
                 var num_cells = this.width * this.height;
                 if (this.mine_cnt >= num_cells) {
-                    return 'Error: Too Many Mines';
+                    return "Error: Too Many Mines";
                 }
 
                 var arr = new Array(num_cells);
@@ -117,10 +182,8 @@
                     if (x == x_init && y == y_init) {
                         continue;
                     }
-                    if (mine_cnt_remain > 0) {
-                        this.board[y][x] = new Cell(true, arr[i]);
-                        mine_cnt_remain--;
-                    }
+                    this.board[y][x] = new Cell(true, arr[i]);
+                    mine_cnt_remain--;
                 }
             }
 
@@ -183,7 +246,7 @@
                     return null;
                 }
                 var cur_cell = this.board[y][x];
-                if (cur_cell.display != '.') {
+                if (cur_cell.display != ".") {
                     if (cur_cell.display != 0) {
                         return this.probe(x, y);
                     } else {
@@ -194,18 +257,81 @@
                     this.place_mine(x, y);
                     board.update_real();
                     this.in_game = true;
+                    start_timer();
                 }
-                var index = String(this.compute_index(x, y));
                 if (cur_cell.is_mine) {
-                    cur_cell.display = '@';
-                    document.getElementById(index).innerHTML = '@';
+                    cur_cell.display = "@";
+                    for (var i = 1; i < this.y_max; i++) {
+                        for (var j = 1; j < this.x_max; j++) {
+                            var cur_idx = String(this.compute_index(j, i));
+                            if (this.board[i][j].is_mine) {
+                                if (this.board[i][j].display == "F") {
+                                    continue;
+                                }
+                                if (i == y && j == x) {
+                                    document.getElementById(cur_idx).innerHTML = "@";
+                                    document.getElementById(cur_idx).style.color = "black";
+                                    document.getElementById(cur_idx).style.backgroundColor = "red";
+                                } else {
+                                    document.getElementById(cur_idx).innerHTML = "@";
+                                    document.getElementById(cur_idx).style.color = "black";
+                                    document.getElementById(cur_idx).style.backgroundColor = "darkGray";
+                                }
+                            } else if (this.board[i][j].display == "F") {
+                                document.getElementById(cur_idx).innerHTML = "X";
+                                document.getElementById(cur_idx).style.color = "red";
+                                document.getElementById(cur_idx).style.backgroundColor = "darkGray";
+                            }
+                        }
+                    }
+                    document.getElementById("status").innerHTML = "(TヘT)";
                     this.in_game = false;
                     this.end_game = true;
                     this.print_final_board();
+                    stop_timer();
                 } else {
+                    var index = String(this.compute_index(x, y));
                     cur_cell.display = cur_cell.real;
-                    console.log('Clicked ' + '(' + x + ', ', + y + ')');
+                    console.log("Clicked " + "(" + x + ", ", + y + ")");
                     document.getElementById(index).innerHTML = cur_cell.display;
+                    switch (cur_cell.display) {
+                        case 0:
+                            document.getElementById(index).style.color = "darkGray";
+                            document.getElementById(index).style.backgroundColor = "darkGray";
+                            break;
+                        case 1:
+                            document.getElementById(index).style.color = "royalBlue";
+                            document.getElementById(index).style.backgroundColor = "darkGray";
+                            break;
+                        case 2:
+                            document.getElementById(index).style.color = "green";
+                            document.getElementById(index).style.backgroundColor = "darkGray";
+                            break;
+                        case 3:
+                            document.getElementById(index).style.color = "fireBrick";
+                            document.getElementById(index).style.backgroundColor = "darkGray";
+                            break;
+                        case 4:
+                            document.getElementById(index).style.color = "darkBlue";
+                            document.getElementById(index).style.backgroundColor = "darkGray";
+                            break;
+                        case 5:
+                            document.getElementById(index).style.color = "maroon";
+                            document.getElementById(index).style.backgroundColor = "darkGray";
+                            break;
+                        case 6:
+                            document.getElementById(index).style.color = "teal";
+                            document.getElementById(index).style.backgroundColor = "darkGray";
+                            break;
+                        case 7:
+                            document.getElementById(index).style.color = "darkRed";
+                            document.getElementById(index).style.backgroundColor = "darkGray";
+                            break;
+                        case 8:
+                            document.getElementById(index).style.color = "brown";
+                            document.getElementById(index).style.backgroundColor = "darkGray";
+                            break;
+                    }
                     this.safe_cnt--;
                     // Click surrounding cells
                     if (cur_cell.real == 0) {
@@ -222,7 +348,9 @@
                 if (this.safe_cnt == 0) {
                     this.in_game = false;
                     this.end_game = true;
-                    console.log('Congrats!')
+                    stop_timer();
+                    document.getElementById("status").innerHTML = "(≧▽≦)";
+                    console.log("Congrats!")
                 }
                 this.print_display_board();
             }
@@ -232,12 +360,17 @@
                     return null;
                 }
                 var cur_cell = this.board[y][x];
-                if (cur_cell.display == '.') {
-                    cur_cell.display = 'F';
-                } else if (cur_cell.display == 'F') {
-                    cur_cell.display = '.';
-                }
                 var index = String(this.compute_index(x, y));
+                if (cur_cell.display == ".") {
+                    cur_cell.display = "F";
+                    this.mine_left--;
+                    document.getElementById(index).style.color = "red";
+                } else if (cur_cell.display == "F") {
+                    cur_cell.display = ".";
+                    this.mine_left++;
+                    document.getElementById(index).style.color = "gainsboro";
+                }
+                document.getElementById("mine_left").value = this.mine_left;
                 document.getElementById(index).innerHTML = cur_cell.display;
             }
 
@@ -252,7 +385,7 @@
                     for (var i = 0; i < 8; i++) {
                         var x_new = neighbors[i][0];
                         var y_new = neighbors[i][1];
-                        if (this.board[y_new][x_new].display == 'F') {
+                        if (this.board[y_new][x_new].display == "F") {
                             flag_cnt++;
                         }
                     }
@@ -260,7 +393,7 @@
                         for (i = 0; i < 8; i++) {
                             x_new = neighbors[i][0];
                             y_new = neighbors[i][1];
-                            if (this.board[y_new][x_new].display == '.') {
+                            if (this.board[y_new][x_new].display == ".") {
                                 this.click(x_new, y_new);
                             }
                         }
@@ -269,30 +402,49 @@
             }
         }
 
-        function addLongDown(ele , fn){
+        function add_long_down(elmt, fn) {
             var time = 0;
             var flag = false;
 
-            ele.addEventListener('mousedown', function(e){
+            elmt.addEventListener("mousedown", function (e) {
                 time = new Date().getTime();
             });
 
-            ele.addEventListener('mouseup', function(e){
+            elmt.addEventListener("mouseup", function (e) {
                 flag = (new Date().getTime() - time) > 500;
-                if(flag){
-                    fn.call(this , e);
+                if (flag) {
+                    fn.call(this, e);
                 }
             });
 
-            ele.addEventListener('click', function(e){
-                if(flag){
+            elmt.addEventListener("click", function (e) {
+                if (flag) {
                     flag = false;
                     e.stopImmediatePropagation();
                 }
             });
         }
-        board = new Board(8, 6, 5);
-        window.onload = function() {
+
+        function reload() {
+            window.location.reload();
+        }
+
+        board = new Board(10, 8, 15);
+
+        function start_timer() {
+            counting = setInterval(count_sec, 1000);
+        }
+
+        function stop_timer() {
+            clearInterval(counting);
+        }
+
+        function count_sec() {
+            board.sec += 1;
+            document.getElementById("timer").value = board.sec;
+        }
+
+        window.onload = function () {
             board.init_board();
             var table = document.createElement("table");
             table.id = "board";
@@ -306,12 +458,12 @@
                     var new_cell = document.createElement("td");
                     new_row.appendChild(new_cell);
                     var new_button = document.createElement("button");
+                    new_button.className = "cell";
                     // Bind with events
-                    addLongDown(new_button, Function("board.flag(" + y_x[1] + "," + y_x[0] + ")"));
-                    new_button.addEventListener('click' , Function("board.click(" + y_x[1] + "," + y_x[0] + ")"))
+                    add_long_down(new_button, Function("board.flag(" + y_x[1] + "," + y_x[0] + ")"));
+                    new_button.addEventListener("click", Function("board.click(" + y_x[1] + "," + y_x[0] + ")"))
                     new_button.id = String(index);
-                    new_button.innerHTML = board.board[row+1][col+1].display;
-                    // new_button.onclick = Function("board.click(" + y_x[1] + "," + y_x[0] + ")");
+                    new_button.innerHTML = board.board[row + 1][col + 1].display;
                     new_cell.appendChild(new_button);
                     index++;
                 }
@@ -319,7 +471,13 @@
         }
     </script>
 </head>
+
 <body>
-    <div id="display" style="border:1px solid #226ed1; width:1000px; height:1200px;">
+    <div style="width:1000px; text-align: center;">
+        <input id="mine_left" class="number" type="text" value="" disabled="true">
+        <button id="status" class="status" onclick="reload()">(￣▽￣)</button>
+        <input id="timer" class="number" type="text" value="0" disabled="true">
+    </div>
+    <div id="display" style="width:1000px; height:1200px;">
     </div>
 </body>
