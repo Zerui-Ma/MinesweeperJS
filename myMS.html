@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>myMS</title>
+    <title>Minesweeper</title>
     <style type="text/css">
         table {
             margin-left: auto;
@@ -275,12 +275,12 @@
                                 } else {
                                     document.getElementById(cur_idx).innerHTML = "@";
                                     document.getElementById(cur_idx).style.color = "black";
-                                    document.getElementById(cur_idx).style.backgroundColor = "darkGray";
+                                    document.getElementById(cur_idx).style.backgroundColor = "darkgray";
                                 }
                             } else if (this.board[i][j].display == "F") {
                                 document.getElementById(cur_idx).innerHTML = "X";
                                 document.getElementById(cur_idx).style.color = "red";
-                                document.getElementById(cur_idx).style.backgroundColor = "darkGray";
+                                document.getElementById(cur_idx).style.backgroundColor = "darkgray";
                             }
                         }
                     }
@@ -296,40 +296,40 @@
                     document.getElementById(index).innerHTML = cur_cell.display;
                     switch (cur_cell.display) {
                         case 0:
-                            document.getElementById(index).style.color = "darkGray";
-                            document.getElementById(index).style.backgroundColor = "darkGray";
+                            document.getElementById(index).style.color = "darkgray";
+                            document.getElementById(index).style.backgroundColor = "darkgray";
                             break;
                         case 1:
-                            document.getElementById(index).style.color = "royalBlue";
-                            document.getElementById(index).style.backgroundColor = "darkGray";
+                            document.getElementById(index).style.color = "royalblue";
+                            document.getElementById(index).style.backgroundColor = "darkgray";
                             break;
                         case 2:
                             document.getElementById(index).style.color = "green";
-                            document.getElementById(index).style.backgroundColor = "darkGray";
+                            document.getElementById(index).style.backgroundColor = "darkgray";
                             break;
                         case 3:
-                            document.getElementById(index).style.color = "fireBrick";
-                            document.getElementById(index).style.backgroundColor = "darkGray";
+                            document.getElementById(index).style.color = "firebrick";
+                            document.getElementById(index).style.backgroundColor = "darkgray";
                             break;
                         case 4:
-                            document.getElementById(index).style.color = "darkBlue";
-                            document.getElementById(index).style.backgroundColor = "darkGray";
+                            document.getElementById(index).style.color = "darkblue";
+                            document.getElementById(index).style.backgroundColor = "darkgray";
                             break;
                         case 5:
                             document.getElementById(index).style.color = "maroon";
-                            document.getElementById(index).style.backgroundColor = "darkGray";
+                            document.getElementById(index).style.backgroundColor = "darkgray";
                             break;
                         case 6:
                             document.getElementById(index).style.color = "teal";
-                            document.getElementById(index).style.backgroundColor = "darkGray";
+                            document.getElementById(index).style.backgroundColor = "darkgray";
                             break;
                         case 7:
-                            document.getElementById(index).style.color = "darkRed";
-                            document.getElementById(index).style.backgroundColor = "darkGray";
+                            document.getElementById(index).style.color = "darkred";
+                            document.getElementById(index).style.backgroundColor = "darkgray";
                             break;
                         case 8:
                             document.getElementById(index).style.color = "brown";
-                            document.getElementById(index).style.backgroundColor = "darkGray";
+                            document.getElementById(index).style.backgroundColor = "darkgray";
                             break;
                     }
                     this.safe_cnt--;
@@ -406,21 +406,33 @@
             var time = 0;
             var flag = false;
 
-            elmt.addEventListener("mousedown", function (e) {
+            elmt.addEventListener("mousedown", function (event) {
                 time = new Date().getTime();
             });
 
-            elmt.addEventListener("mouseup", function (e) {
+            elmt.addEventListener("mouseup", function (event) {
                 flag = (new Date().getTime() - time) > 500;
                 if (flag) {
-                    fn.call(this, e);
+                    fn.call(this, event);
                 }
             });
 
-            elmt.addEventListener("click", function (e) {
+            elmt.addEventListener("click", function (event) {
                 if (flag) {
                     flag = false;
-                    e.stopImmediatePropagation();
+                    event.stopImmediatePropagation();
+                }
+            });
+        }
+
+        function add_left_right_click(elmt, fn_left, fn_right) {
+            elmt.addEventListener("mouseup", function (event) {
+                if (event.button == 0) {
+                    fn_left.call(this, event);
+                } else if (event.button == 2) {
+                    fn_right.call(this, event);
+                } else {
+                    fn_right.call(this, event);
                 }
             });
         }
@@ -459,9 +471,13 @@
                     new_row.appendChild(new_cell);
                     var new_button = document.createElement("button");
                     new_button.className = "cell";
-                    // Bind with events
+                    /* Bind click/flag with click/hold of left mouse button
                     add_long_down(new_button, Function("board.flag(" + y_x[1] + "," + y_x[0] + ")"));
-                    new_button.addEventListener("click", Function("board.click(" + y_x[1] + "," + y_x[0] + ")"))
+                    new_button.addEventListener("click", Function("board.click(" + y_x[1] + "," + y_x[0] + ")"));
+                    */
+
+                    // Bind click/flag with click of left/right mouse button
+                    add_left_right_click(new_button, Function("board.click(" + y_x[1] + "," + y_x[0] + ")"), Function("board.flag(" + y_x[1] + "," + y_x[0] + ")"));
                     new_button.id = String(index);
                     new_button.innerHTML = board.board[row + 1][col + 1].display;
                     new_cell.appendChild(new_button);
@@ -469,10 +485,11 @@
                 }
             }
         }
+        // TODO: Set difficulty levels
     </script>
 </head>
 
-<body>
+<body oncontextmenu="return false">
     <div style="width:1000px; text-align: center;">
         <input id="mine_left" class="number" type="text" value="" disabled="true">
         <button id="status" class="status" onclick="reload()">(￣▽￣)</button>
